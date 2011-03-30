@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="NicoCache" default="default" basedir=".">
+  <property name="is.jar.module" value="true"/>
+  <import file="bp-project/main.xml"/>
+</project>
