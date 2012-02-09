@@ -25,6 +25,7 @@ import dareka.processor.impl.GetPostProcessor;
 import dareka.processor.impl.NicoCachingProcessor;
 import dareka.processor.impl.NicoRecordingUrlProcessor;
 import dareka.processor.impl.NicoRecordingWatchProcessor;
+import dareka.processor.impl.SaveCommentProcessor;
 
 public class Server implements Observer {
     private static final int MAX_WAITING_TIME = 10;
@@ -159,6 +160,7 @@ public class Server implements Observer {
 
                         registerProcessor(nicoRecordingUrlProcessor, worker);
                         registerProcessor(nicoRecordingWatchProcessor, worker);
+                        registerProcessor(new SaveCommentProcessor(), worker);
                         registerProcessor(getPostProcessor, worker);
                         registerProcessor(connectProcessor, worker);
 
