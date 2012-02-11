@@ -151,15 +151,21 @@ public class SaveCommentListener implements TransferListener {
 
 	private String inflateAndDecode(ByteArrayOutputStream bufferStream,
 			String charset) throws IOException {
-		byte[] array = bufferStream.toByteArray();
-		ByteArrayInputStream bais = new ByteArrayInputStream(array);
-		GZIPInputStream gzis = new GZIPInputStream(bais);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(array.length);
-		byte[] buffer = new byte[4096];
-		int count;
-		while ((count = gzis.read(buffer, 0, buffer.length)) != -1) {
-			baos.write(buffer, 0, count);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		try {
+			byte[] array = bufferStream.toByteArray();
+			ByteArrayInputStream bais = new ByteArrayInputStream(array);
+			GZIPInputStream gzis = new GZIPInputStream(bais);
+
+			int b;
+			while ((b = gzis.read()) != -1) {
+				baos.write(b);
+			}
+		} catch (IOException e) {
+			// ignore `Unexpected end of GZIP stream' error
 		}
+
 		baos.flush();
 		Charset c = Charset.forName(charset);
 		ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
