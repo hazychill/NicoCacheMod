@@ -3,8 +3,10 @@ package dareka.processor.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -32,6 +34,7 @@ public class SaveCommentListener implements TransferListener {
 	private boolean isFirstFileOut;
 	private boolean isGzipDeflated;
 	private boolean isNotDeflated;
+	private File outputFile;
 
 	public SaveCommentListener(String id) {
 		this.id = id;
@@ -117,12 +120,10 @@ public class SaveCommentListener implements TransferListener {
 							}
 							if (dirExists) {
 								String fileName = MessageFormat.format(
-										"{0}-{1}.xml{2}", videoId, id,
+										"_{0}-{1}.xml{2}", videoId, id,
 										(isGzipDeflated) ? (".gz") : (""));
-								File outputFile = new File(outputDir, fileName);
+								outputFile = new File(outputDir, fileName);
 								fileOutput = new FileOutputStream(outputFile);
-								Logger.info("Comment XML will be saved to: "
-										+ outputFile.getAbsolutePath());
 							}
 						}
 					}
@@ -182,8 +183,96 @@ public class SaveCommentListener implements TransferListener {
 				fileOutput.flush();
 				fileOutput.close();
 			}
+
+			if (outputFile != null) {
+				String tempFileName = outputFile.getName();
+				if (tempFileName.startsWith("_")) {
+					File dstFile;
+					String fileName = tempFileName.substring(1);
+					File dir = outputFile.getParentFile();
+					if (tempFileName.endsWith(".gz")) {
+						fileName = fileName.substring(0, fileName.length() - 3);
+						dstFile = new File(dir, fileName);
+						copyAndInflateFile(outputFile, dstFile);
+					} else {
+						dstFile = new File(dir, fileName);
+						copyFile(outputFile, dstFile);
+					}
+					outputFile.delete();
+					Logger.info("Comment saved: " + dstFile.getAbsolutePath());
+				}
+
+			}
 		} catch (IOException e) {
 			logException(e);
+		}
+	}
+
+	private void copyFile(File srcFile, File dstFile) throws IOException {
+		InputStream input = null;
+		OutputStream output = null;
+		try {
+			input = new FileInputStream(srcFile);
+			output = new FileOutputStream(dstFile);
+			byte[] buffer = new byte[8192];
+			int count;
+			while ((count = input.read(buffer, 0, buffer.length)) != -1) {
+				output.write(buffer, 0, count);
+			}
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (Throwable e) {
+					logException(e);
+				}
+			}
+			if (output != null) {
+				try {
+					output.close();
+				} catch (Throwable e) {
+					logException(e);
+				}
+			}
+		}
+	}
+
+	private void copyAndInflateFile(File srcFile, File dstFile)
+			throws IOException {
+		InputStream input = null;
+		InputStream gzis = null;
+		OutputStream output = null;
+		try {
+			input = new FileInputStream(srcFile);
+			gzis = new GZIPInputStream(input);
+			output = new FileOutputStream(dstFile);
+			byte[] buffer = new byte[8192];
+			int count;
+			while ((count = gzis.read(buffer, 0, buffer.length)) != -1) {
+				output.write(buffer, 0, count);
+			}
+		} finally {
+			if (gzis != null) {
+				try {
+					gzis.close();
+				} catch (Throwable e) {
+					logException(e);
+				}
+			}
+			if (input != null) {
+				try {
+					input.close();
+				} catch (Throwable e) {
+					logException(e);
+				}
+			}
+			if (output != null) {
+				try {
+					output.close();
+				} catch (Throwable e) {
+					logException(e);
+				}
+			}
 		}
 	}
 
