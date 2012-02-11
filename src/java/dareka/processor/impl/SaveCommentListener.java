@@ -18,6 +18,7 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipException;
 
 import dareka.common.Logger;
 import dareka.processor.HttpResponseHeader;
@@ -248,8 +249,15 @@ public class SaveCommentListener implements TransferListener {
 			output = new FileOutputStream(dstFile);
 			byte[] buffer = new byte[8192];
 			int count;
-			while ((count = gzis.read(buffer, 0, buffer.length)) != -1) {
-				output.write(buffer, 0, count);
+			try {
+				while ((count = gzis.read(buffer, 0, buffer.length)) != -1) {
+					output.write(buffer, 0, count);
+				}
+			} catch (ZipException e) {
+				// Ignore `Corrupt GZIP trailer' error...
+				if (e.getMessage().indexOf("Corrupt GZIP trailer") == -1) {
+					throw e;
+				}
 			}
 		} finally {
 			if (gzis != null) {
