@@ -94,33 +94,36 @@ public class SaveCommentListener implements TransferListener {
 						return;
 					}
 
-					Matcher m = viewCounterPattern.matcher(str);
-					if (m.find()) {
-						String videoId = m.group(1);
-						String numDir;
-						if (videoId.length() >= 4) {
-							numDir = videoId.substring(videoId.length() - 2);
-						} else if (videoId.length() == 3) {
-							numDir = "0" + videoId.substring(2);
-						} else {
-							numDir = null;
-						}
-						File outputDir = getOutputDirectory();
-						if (numDir != null) {
-							outputDir = new File(outputDir, numDir);
-						}
-						boolean dirExists = true;
-						if (!outputDir.isDirectory()) {
-							dirExists = outputDir.mkdirs();
-						}
-						if (dirExists) {
-							String fileName = MessageFormat.format(
-									"{0}-{1}.xml{2}", videoId, id,
-									(isGzipDeflated) ? (".gz") : (""));
-							File outputFile = new File(outputDir, fileName);
-							fileOutput = new FileOutputStream(outputFile);
-							Logger.info("Comment XML will be saved to: "
-									+ outputFile.getAbsolutePath());
+					if (str != null && str.indexOf("<chat thread=") != -1) {
+						Matcher m = viewCounterPattern.matcher(str);
+						if (m.find()) {
+							String videoId = m.group(1);
+							String numDir;
+							if (videoId.length() >= 4) {
+								numDir = videoId
+										.substring(videoId.length() - 2);
+							} else if (videoId.length() == 3) {
+								numDir = "0" + videoId.substring(2);
+							} else {
+								numDir = null;
+							}
+							File outputDir = getOutputDirectory();
+							if (numDir != null) {
+								outputDir = new File(outputDir, numDir);
+							}
+							boolean dirExists = true;
+							if (!outputDir.isDirectory()) {
+								dirExists = outputDir.mkdirs();
+							}
+							if (dirExists) {
+								String fileName = MessageFormat.format(
+										"{0}-{1}.xml{2}", videoId, id,
+										(isGzipDeflated) ? (".gz") : (""));
+								File outputFile = new File(outputDir, fileName);
+								fileOutput = new FileOutputStream(outputFile);
+								Logger.info("Comment XML will be saved to: "
+										+ outputFile.getAbsolutePath());
+							}
 						}
 					}
 
