@@ -1,7 +1,8 @@
 package dareka.processor.impl;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.text.MessageFormat;
+import java.util.Calendar;
 import java.util.regex.Pattern;
 
 import dareka.processor.HttpRequestHeader;
@@ -41,9 +42,25 @@ public class SaveCommentProcessor implements Processor {
 		return r;
 	}
 
+	private static int sequence;
+	private static Object sequenceLock;
+
+	static {
+		sequence = 0;
+		sequenceLock = new Object();
+	}
+
 	private String createId() {
-		// TODO
-		return UUID.randomUUID().toString();
+		int sequence;
+
+		synchronized (sequenceLock) {
+			SaveCommentProcessor.sequence++;
+			sequence = SaveCommentProcessor.sequence;
+		}
+
+		return MessageFormat.format(
+				"{0,date,yyyyMMddHHmmssSSS}-{1,number,00000}", Calendar
+						.getInstance().getTime(), sequence);
 	}
 
 }
