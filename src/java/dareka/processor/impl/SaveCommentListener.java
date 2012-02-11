@@ -193,17 +193,34 @@ public class SaveCommentListener implements TransferListener {
 	}
 
 	private int getMaxBufferLength() {
-		// TODO make configurable
-		return 8192;
+		Integer maxBufferLengthObj = Integer
+				.getInteger("commentDetectBufferLength");
+		int maxBufferLength;
+		if (maxBufferLengthObj != null) {
+			maxBufferLength = maxBufferLengthObj.intValue();
+		} else {
+			maxBufferLength = 8192;
+		}
+		return maxBufferLength;
 	}
 
 	private String getCharset() {
-		// TODO make configurable
-		return "UTF-8";
+		String commentXmlCharset = System.getProperty("commentXmlCharset");
+		if (commentXmlCharset == null) {
+			commentXmlCharset = "UTF-8";
+		}
+		return commentXmlCharset;
 	}
 
 	private File getOutputDirectory() {
-		// TODO make configurable
-		return new File("C:/test/cache/xml");
+		String outputDirPath = System.getProperty("commentOutputDirectory");
+		File outputDir;
+		if (outputDirPath != null) {
+			outputDir = new File(outputDirPath);
+		} else {
+			File cacheDir = new File("cache");
+			outputDir = new File(cacheDir, "xml");
+		}
+		return outputDir;
 	}
 }
