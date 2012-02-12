@@ -32,7 +32,6 @@ public class SaveCommentListener implements TransferListener {
 
 	private boolean runOutOfBuffer;
 	private OutputStream fileOutput;
-	private boolean isFirstFileOut;
 	private boolean isGzipDeflated;
 	private boolean isNotDeflated;
 	private File outputFile;
@@ -45,7 +44,6 @@ public class SaveCommentListener implements TransferListener {
 				.compile("<view_counter [^>]*id=\"([a-z][a-z][0-9]+)\"");
 		runOutOfBuffer = false;
 		fileOutput = null;
-		isFirstFileOut = true;
 		isGzipDeflated = false;
 		isNotDeflated = false;
 	}
@@ -125,6 +123,9 @@ public class SaveCommentListener implements TransferListener {
 										(isGzipDeflated) ? (".gz") : (""));
 								outputFile = new File(outputDir, fileName);
 								fileOutput = new FileOutputStream(outputFile);
+								bufferStream.flush();
+								byte[] buffered = bufferStream.toByteArray();
+								fileOutput.write(buffered, 0, buffered.length);
 							}
 						}
 					}
@@ -138,15 +139,7 @@ public class SaveCommentListener implements TransferListener {
 					logException(e);
 				}
 
-			}
-
-			if (fileOutput != null) {
-				if (isFirstFileOut) {
-					isFirstFileOut = false;
-					bufferStream.flush();
-					byte[] buffered = bufferStream.toByteArray();
-					fileOutput.write(buffered, 0, buffered.length);
-				}
+			} else if (fileOutput != null) {
 				fileOutput.write(buf, 0, length);
 			}
 		} catch (Throwable e) {
