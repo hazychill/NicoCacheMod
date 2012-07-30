@@ -33,6 +33,9 @@ public class NicoRecordingWatchListener implements TransferListener {
      */
     private static final Pattern VIDEO_ID_PATTERN =
             Pattern.compile("(?:video_id = |id:\\s*)'([a-z]{2})(\\d+)'");
+    // videoDetail&quot;:\{&quot;v&quot;:&quot;.+?&quot;,&quot;id&quot;:&quot;([a-z]+)(\d+)&quot;
+    private static final Pattern VIDEO_ID_PATTERN2 =
+            Pattern.compile("videoDetail&quot;:\\{&quot;v&quot;:&quot;.+?&quot;,&quot;id&quot;:&quot;([a-z]+)(\\d+)&quot;");
 
     /**
      * Retrieve title from h1 element instead of title element, because
@@ -101,8 +104,11 @@ public class NicoRecordingWatchListener implements TransferListener {
         if (type == null) {
             Matcher mId = VIDEO_ID_PATTERN.matcher(page);
             if (!mId.find()) {
-                Logger.warning("no video id found");
-                return;
+            	mId = VIDEO_ID_PATTERN2.matcher(page);
+            	if (!mId.find()) {
+                    Logger.warning("no video id found");
+                    return;
+            	}
             }
 
             type = mId.group(1);
