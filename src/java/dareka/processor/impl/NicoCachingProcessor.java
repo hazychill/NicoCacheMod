@@ -55,7 +55,7 @@ public class NicoCachingProcessor implements Processor {
         MovieData data = new MovieData(m);
 
         if (data.getCache().exists()) {
-            Logger.info("using cache: " + data.getCache().getCacheFileName());
+            Logger.info("using cache         : " + data.getCache().getCacheFileName());
             if (Boolean.getBoolean("touchCache")) {
                 data.getCache().touch();
             }
@@ -76,7 +76,7 @@ public class NicoCachingProcessor implements Processor {
             executor.execute(retrieveTitlteTask);
         }
 
-        Logger.info("no cache found: " + data.getCache().getCacheFileName());
+        Logger.info("no cache found      : " + data.getCache().getCacheFileName());
 
         // [nl] ブラウザのレジューム無効と、NCでのレジューム対応
         requestHeader.removeMessageHeader("Range");

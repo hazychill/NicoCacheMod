@@ -229,7 +229,7 @@ public class NicoCachingListener implements TransferListener {
                 Logger.warning("title retrieving failed: " + e.toString());
             }
 
-            Logger.info("suspended: " + cache.getCacheFileName());
+            Logger.info("suspended           : " + cache.getCacheFileName());
         }
     }
 
@@ -254,7 +254,7 @@ public class NicoCachingListener implements TransferListener {
             }
 
             cache.store();
-            Logger.info("cache completed: " + cache.getCacheFileName());
+            Logger.info("cache completed     : " + cache.getCacheFileName());
         }
     }
 }
