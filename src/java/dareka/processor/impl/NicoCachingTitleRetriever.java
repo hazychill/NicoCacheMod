@@ -24,6 +24,10 @@ public class NicoCachingTitleRetriever implements Callable<String> {
     		"<.+?>");
 	private static final Pattern UTF16_PATTERN = Pattern.compile(
 			"\\\\u([0-9A-Fa-f]{4})");
+	// <div id="watchAPIDataContainer" style="display:none">(\{.+?\})</div>
+	private static final Pattern HTML_JSON_PATTERN = Pattern.compile("<div id=\"watchAPIDataContainer\" style=\"display:none\">(\\{.+?\\})</div>");
+	// "title" *: *"(.+?)"
+	private static final Pattern HTML_TITLE_IN_JSON_PATTERN = Pattern.compile("\"title\" *: *\"(.+?)\"");
 
     private String type;
     private String id;
@@ -64,6 +68,18 @@ public class NicoCachingTitleRetriever implements Callable<String> {
      */
     public static String getTitleFromResponse(String htmlSource) {
         if (htmlSource != null) {
+			Matcher jsonMatcher = HTML_JSON_PATTERN.matcher(htmlSource);
+			if (jsonMatcher.find()) {
+				String jsonTextRaw = jsonMatcher.group(1);
+				String jsonTextUnescaped = unescape(jsonTextRaw);
+				String jsonText = ascii2native(jsonTextUnescaped);
+				Matcher titleInJsonMatcher = HTML_TITLE_IN_JSON_PATTERN.matcher(jsonText);
+				if (titleInJsonMatcher.find()) {
+					String titleInJson = titleInJsonMatcher.group(1);
+					return titleInJson;
+				}
+			}
+        	
 // 2010/10/14の仕様変更でH1でヘッディングされなくなった
 // 念のため <p class="video_title"→Video.title→H1 の順に取得を試みる
         	Matcher mTitle = HTML_TITLE_CLASS_PATTERN.matcher(htmlSource);
