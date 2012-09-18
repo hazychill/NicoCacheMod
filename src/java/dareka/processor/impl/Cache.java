@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -266,12 +267,59 @@ public class Cache {
         File newName =
                 new File(cacheDir, NLTMP_ + getId() + "_"
                         + getSanitizedDescription(title) + postfix);
-        if (getCacheTmpFile().renameTo(newName)) {
+      if (renameByCopy(getCacheTmpFile(), newName)) {
             id2Tmp.put(getId(), newName);
         }
     }
 
-    public long length() {
+	private boolean renameByCopy(File oldFile, File newFile) {
+		boolean result;
+		boolean copySuccess = copyFile(oldFile, newFile);
+		if (copySuccess) {
+			result =  oldFile.delete();
+		}
+		else {
+			result = false;
+		}
+
+		if (result == false) {
+			Logger.warning("rename failed: " + oldFile.getAbsolutePath() + " -> " + newFile.getAbsolutePath());
+		}
+
+		return result;
+	}
+
+	private boolean copyFile(File srcFile, File dstFile) {
+		try {
+			if(!dstFile.exists()) {
+				dstFile.createNewFile();
+			}
+
+			FileChannel source = null;
+			FileChannel destination = null;
+
+			try {
+				source = new FileInputStream(srcFile).getChannel();
+				destination = new FileOutputStream(dstFile).getChannel();
+				destination.transferFrom(source, 0, source.size());
+				return true;
+			}
+			finally {
+				if(source != null) {
+					source.close();
+				}
+				if(destination != null) {
+					destination.close();
+				}
+			}
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	public long length() {
         return cacheFile.length();
     }
 
@@ -330,7 +378,7 @@ public class Cache {
 
         cacheFile = new File(parentDir, cacheFile.getName());
 
-        if (cacheTmpFile.renameTo(cacheFile)) {
+      if (renameByCopy(cacheTmpFile, cacheFile)) {
             id2File.put(cacheId, cacheFile);
         } else {
             cacheTmpFile.delete();
