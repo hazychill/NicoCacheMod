@@ -172,6 +172,11 @@ public class ConnectionManager extends Observable implements Runnable {
 
     private boolean useProcessor(HttpRequestHeader requestHeader,
             Processor processor) throws IOException {
+
+        // force japanese
+        requestHeader.removeMessageHeader("Accept-Language");
+        requestHeader.addMessageHeader("Accept-Language", "ja,en-US;q=0.8,en;q=0.6");
+
         processingResource = processor.onRequest(requestHeader);
 
         if (stopped) {
