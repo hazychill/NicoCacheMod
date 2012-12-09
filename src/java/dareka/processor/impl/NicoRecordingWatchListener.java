@@ -24,7 +24,7 @@ import dareka.processor.TransferListener;
  *
  */
 public class NicoRecordingWatchListener implements TransferListener {
-    private static final int MAX_READ_SIZE = 32 * 1024; // for safety
+    private static final int MAX_READ_SIZE = 32 * 1024 * 10; // for safety
     /**
      * In some page such as my memory, the URL does not contain
      * the type and id of the movie. In case of this, retrieve the title
