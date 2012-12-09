@@ -19,7 +19,7 @@ import dareka.common.Logger;
 public class NicoIdInfoCache {
     private static final NicoIdInfoCache SINGLETON_INSTANCE =
             new NicoIdInfoCache();
-    private static final int MAX_RECENT = 10;
+    private static final int MAX_RECENT = 10000;
 
     private ReferenceQueue<Entry> queue = new ReferenceQueue<Entry>();
     private ConcurrentHashMap<String, EntryReference> id2title =

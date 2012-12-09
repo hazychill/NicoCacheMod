@@ -71,6 +71,12 @@ public class Cache {
             return;
         }
 
+        NicoIdInfoCache idInfoCache = NicoIdInfoCache.getInstance();
+        // ^([a-z][a-z])([0-9]+)(?:low)?_(.+)\.(?:mp4|swf|slv)$
+        Pattern idInfoPatternWithTitle = Pattern.compile("^([a-z][a-z])([0-9]+)(?:low)?_(.+)\\.(?:mp4|swf|slv)$");
+        // ^([a-z][a-z])([0-9]+)(?:low)?\.(?:mp4|swf|slv)$
+        Pattern idInfoPatternWithoutTitle = Pattern.compile("^([a-z][a-z])([0-9]+)(?:low)?\\.(?:mp4|swf|slv)$");
+
         for (File file : cacheFiles) {
             if (file.isDirectory()) {
                 searchCachesOnADirectory(file, depth + 1);
@@ -88,6 +94,22 @@ public class Cache {
 
                         Logger.debug("cache found: " + id + " => "
                                 + file.getPath());
+                    }
+                }
+
+                Matcher m = idInfoPatternWithTitle.matcher(file.getName());
+                if (m.find()) {
+                    String idInfoType = m.group(1);
+                    String idInfoId = m.group(2);
+                    String idInfoTitle = m.group(3);
+                    idInfoCache.put(idInfoType, idInfoId, idInfoTitle);
+                }
+                else {
+                    m = idInfoPatternWithoutTitle.matcher(file.getName());
+                    if (m.find()) {
+                        String idInfoType = m.group(1);
+                        String idInfoId = m.group(2);
+                        idInfoCache.putOnlyTypeAndId(idInfoType, idInfoId);
                     }
                 }
             }
